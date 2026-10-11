@@ -1,0 +1,102 @@
+<%--
+  Left navigation. Items are shown according to the global role, and the active
+  item is highlighted by comparing the current URI with the link target.
+  Hiding an item is only a convenience - every page re-checks permissions on the
+  server before doing anything.
+--%>
+<c:set var="currentPath" value="${pageContext.request.requestURI}"/>
+<aside class="wp-sidebar" id="wpSidebar">
+    <div class="wp-brand">
+        <span class="wp-logo"><i class="bi bi-patch-check-fill"></i></span>
+        <span>WorkProof</span>
+    </div>
+
+    <ul class="wp-nav">
+        <li class="wp-nav-heading">Workspace</li>
+        <li>
+            <a href="${pageContext.request.contextPath}/dashboard"
+               class="${fn:startsWith(currentPath, pageContext.request.contextPath.concat('/dashboard')) ? 'active' : ''}">
+                <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a href="${pageContext.request.contextPath}/projects"
+               class="${fn:startsWith(currentPath, pageContext.request.contextPath.concat('/projects')) ? 'active' : ''}">
+                <i class="bi bi-kanban"></i><span>Projects</span>
+            </a>
+        </li>
+        <li>
+            <a href="${pageContext.request.contextPath}/tasks"
+               class="${fn:startsWith(currentPath, pageContext.request.contextPath.concat('/tasks')) ? 'active' : ''}">
+                <i class="bi bi-list-check"></i><span>Tasks</span>
+            </a>
+        </li>
+        <li>
+            <a href="${pageContext.request.contextPath}/submissions"
+               class="${fn:startsWith(currentPath, pageContext.request.contextPath.concat('/submissions')) ? 'active' : ''}">
+                <i class="bi bi-cloud-arrow-up"></i><span>${currentUser.member ? 'My Evidence' : 'Evidence'}</span>
+            </a>
+        </li>
+
+        <c:if test="${currentUser.reviewer or currentUser.manager or currentUser.admin}">
+            <li class="wp-nav-heading">Verification</li>
+            <li>
+                <a href="${pageContext.request.contextPath}/reviews"
+                   class="${fn:startsWith(currentPath, pageContext.request.contextPath.concat('/reviews')) ? 'active' : ''}">
+                    <i class="bi bi-clipboard2-check"></i>
+                    <span>Review Queue</span>
+                </a>
+            </li>
+        </c:if>
+
+        <li class="wp-nav-heading">Insights</li>
+        <li>
+            <a href="${pageContext.request.contextPath}/reports"
+               class="${fn:startsWith(currentPath, pageContext.request.contextPath.concat('/reports')) ? 'active' : ''}">
+                <i class="bi bi-bar-chart-line"></i><span>Reports</span>
+            </a>
+        </li>
+        <li>
+            <a href="${pageContext.request.contextPath}/notifications"
+               class="${fn:startsWith(currentPath, pageContext.request.contextPath.concat('/notifications')) ? 'active' : ''}">
+                <i class="bi bi-bell"></i><span>Notifications</span>
+                <c:if test="${not empty sessionScope.unreadNotifications and sessionScope.unreadNotifications gt 0}">
+                    <span class="wp-nav-badge"><c:out value="${sessionScope.unreadNotifications}"/></span>
+                </c:if>
+            </a>
+        </li>
+
+        <c:if test="${currentUser.admin}">
+            <li class="wp-nav-heading">Administration</li>
+            <li>
+                <a href="${pageContext.request.contextPath}/admin/users"
+                   class="${fn:startsWith(currentPath, pageContext.request.contextPath.concat('/admin/users')) ? 'active' : ''}">
+                    <i class="bi bi-people"></i><span>User Management</span>
+                </a>
+            </li>
+            <li>
+                <a href="${pageContext.request.contextPath}/admin/activity"
+                   class="${fn:startsWith(currentPath, pageContext.request.contextPath.concat('/admin/activity')) ? 'active' : ''}">
+                    <i class="bi bi-shield-check"></i><span>System Activity</span>
+                </a>
+            </li>
+        </c:if>
+
+        <li class="wp-nav-heading">Account</li>
+        <li>
+            <a href="${pageContext.request.contextPath}/profile"
+               class="${fn:startsWith(currentPath, pageContext.request.contextPath.concat('/profile')) ? 'active' : ''}">
+                <i class="bi bi-person-circle"></i><span>My Profile</span>
+            </a>
+        </li>
+        <li>
+            <form method="post" action="${pageContext.request.contextPath}/logout" class="m-0">
+                <input type="hidden" name="_csrf" value="${sessionScope.csrfToken}">
+                <button type="submit" class="btn btn-link wp-nav-link p-0 border-0 w-100 text-start"
+                        style="display:flex;align-items:center;gap:.7rem;padding:.62rem .85rem!important;border-radius:9px;color:#c9d5e6;font-weight:500;">
+                    <i class="bi bi-box-arrow-right"></i><span>Sign out</span>
+                </button>
+            </form>
+        </li>
+    </ul>
+</aside>

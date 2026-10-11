@@ -1,0 +1,19 @@
+<%--
+  Common HTML head + opening layout markup for a signed-in page.
+  Include with:  <%@ include file="/WEB-INF/views/fragments/head.jspf" %>
+  The including page sets  <c:set var="pageTitle" value="..."/>  BEFORE the include.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="WorkProof - work management and proof-of-work verification">
+    <title><c:out value="${pageTitle}"/> | WorkProof</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/vendor/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/workproof.css">
+    <link rel="icon" href="${pageContext.request.contextPath}/assets/img/favicon.svg" type="image/svg+xml">
+</head>
+<body>

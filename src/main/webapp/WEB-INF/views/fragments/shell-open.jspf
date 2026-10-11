@@ -1,0 +1,7 @@
+<%-- Opens the dashboard shell: sidebar + top bar + content area. --%>
+<div class="wp-shell">
+    <%@ include file="/WEB-INF/views/fragments/sidebar.jspf" %>
+    <main class="wp-main">
+        <%@ include file="/WEB-INF/views/fragments/topbar.jspf" %>
+        <div class="wp-content">
+            <%@ include file="/WEB-INF/views/fragments/messages.jspf" %>

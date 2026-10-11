@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  WorkProof tag library: small, presentation-only helper functions for the JSP pages.
+  Declared in each page with:
+      <%@ taglib prefix="wp" uri="http://workproof.com/tags" %>
+  All functions return plain text. User supplied values are still printed with
+  <c:out> so that any HTML in them is escaped (XSS protection).
+-->
+<taglib xmlns="http://java.sun.com/xml/ns/javaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+                            http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
+        version="2.1">
+
+    <description>WorkProof presentation helper functions</description>
+    <tlib-version>1.0</tlib-version>
+    <short-name>wp</short-name>
+    <uri>http://workproof.com/tags</uri>
+
+    <function>
+        <description>Formats a date as 11 Oct 2026</description>
+        <name>date</name>
+        <function-class>com.workproof.util.JspFunctions</function-class>
+        <function-signature>java.lang.String date(java.lang.Object)</function-signature>
+    </function>
+
+    <function>
+        <description>Formats a date-time as 11 Oct 2026, 14:30</description>
+        <name>dateTime</name>
+        <function-class>com.workproof.util.JspFunctions</function-class>
+        <function-signature>java.lang.String dateTime(java.lang.Object)</function-signature>
+    </function>
+
+    <function>
+        <description>Formats a time as 14:30</description>
+        <name>time</name>
+        <function-class>com.workproof.util.JspFunctions</function-class>
+        <function-signature>java.lang.String time(java.lang.Object)</function-signature>
+    </function>
+
+    <function>
+        <description>Relative time such as "2 hours ago"</description>
+        <name>timeAgo</name>
+        <function-class>com.workproof.util.JspFunctions</function-class>
+        <function-signature>java.lang.String timeAgo(java.lang.Object)</function-signature>
+    </function>
+
+    <function>
+        <description>Initials for an avatar circle</description>
+        <name>initials</name>
+        <function-class>com.workproof.util.JspFunctions</function-class>
+        <function-signature>java.lang.String initials(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <description>Human readable file size</description>
+        <name>fileSize</name>
+        <function-class>com.workproof.util.JspFunctions</function-class>
+        <function-signature>java.lang.String fileSize(java.lang.Object)</function-signature>
+    </function>
+
+    <function>
+        <description>Shortens a long text value</description>
+        <name>shorten</name>
+        <function-class>com.workproof.util.JspFunctions</function-class>
+        <function-signature>java.lang.String shorten(java.lang.String, int)</function-signature>
+    </function>
+
+    <function>
+        <description>Formats a percentage value</description>
+        <name>percent</name>
+        <function-class>com.workproof.util.JspFunctions</function-class>
+        <function-signature>java.lang.String percent(java.lang.Object)</function-signature>
+    </function>
+
+    <function>
+        <description>"in 4 days" or "3 days ago"</description>
+        <name>daysFromToday</name>
+        <function-class>com.workproof.util.JspFunctions</function-class>
+        <function-signature>java.lang.String daysFromToday(java.lang.Object)</function-signature>
+    </function>
+
+    <function>
+        <description>Percentage of part over total, never divides by zero</description>
+        <name>ratioPercent</name>
+        <function-class>com.workproof.util.JspFunctions</function-class>
+        <function-signature>long ratioPercent(long, long)</function-signature>
+    </function>
+
+</taglib>

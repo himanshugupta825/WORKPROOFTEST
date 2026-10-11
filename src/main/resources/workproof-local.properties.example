@@ -1,0 +1,16 @@
+# ============================================================================
+#  Copy this file to  src/main/resources/workproof-local.properties
+#  and put YOUR local MySQL password in it.
+#
+#  The real file is listed in .gitignore, so it is never pushed to GitHub.
+# ============================================================================
+
+workproof.db.url=jdbc:mysql://localhost:3306/workproof?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8&useUnicode=true
+workproof.db.user=root
+workproof.db.password=YourLocalMySqlRootPassword
+
+# Optional overrides:
+# workproof.upload.dir=/home/yourname/workproof-uploads
+# workproof.upload.maxFileSizeMb=10
+# workproof.session.timeoutMinutes=30
+# workproof.review.allowSelfReview=false

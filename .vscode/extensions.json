@@ -1,0 +1,10 @@
+{
+  "// WorkProof": "Recommended VS Code extensions for this project (Ctrl+Shift+X -> @recommended).",
+  "recommendations": [
+    "vscjava.vscode-java-pack",
+    "redhat.vscode-community-server-connector",
+    "redhat.vscode-xml",
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-mysql"
+  ]
+}

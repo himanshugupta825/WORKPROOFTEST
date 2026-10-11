@@ -1,0 +1,13 @@
+    </div><!-- /.wp-content -->
+</main><!-- /.wp-main -->
+</div><!-- /.wp-shell -->
+
+<footer class="text-center text-muted-soft small py-3 wp-no-print">
+    WorkProof &middot; Work Management and Proof-of-Work Verification System &middot;
+    built with Java 17, Servlets, JSP, JDBC, MySQL and Bootstrap 5
+</footer>
+
+<script src="${pageContext.request.contextPath}/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/workproof.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# WorkProof - Tomcat environment template
+#
+# Copy this file to  $CATALINA_BASE/bin/setenv.sh  and edit the values for your
+# machine.  Tomcat sources setenv.sh automatically on start, so the database
+# password never has to appear in web.xml, in the WAR or on the command line.
+#
+#   cp scripts/tomcat-setenv.sh.example /opt/tomcat/bin/setenv.sh
+#   chmod +x /opt/tomcat/bin/setenv.sh
+# ---------------------------------------------------------------------------
+
+# --- Java 17 (Tomcat 9 needs a JDK on the machine) -------------------------
+export JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
+
+# --- Database ---------------------------------------------------------------
+# Note the parameters: without allowPublicKeyRetrieval the MySQL 8 driver
+# refuses the connection when the server uses caching_sha2_password.
+export WORKPROOF_DB_URL="jdbc:mysql://localhost:3306/workproof?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8&useUnicode=true"
+export WORKPROOF_DB_USER="workproof_app"
+export WORKPROOF_DB_PASSWORD="change-me"
+
+# --- Evidence storage (MUST live outside the web application) ---------------
+export WORKPROOF_UPLOAD_DIR="/var/lib/workproof/uploads"
+
+# --- Optional tuning --------------------------------------------------------
+export WORKPROOF_DB_POOL_SIZE="10"
+export WORKPROOF_UPLOAD_MAX_MB="10"
+export WORKPROOF_SESSION_TIMEOUT_MIN="30"
+export WORKPROOF_ALLOW_SELF_REVIEW="false"
+
+export CATALINA_OPTS="$CATALINA_OPTS -Dfile.encoding=UTF-8"

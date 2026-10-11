@@ -1,0 +1,31 @@
+<%--
+  Flash messages and validation errors.
+  flashSuccess / flashError are set by the servlets before a redirect and removed
+  here after being displayed, so they appear exactly once.
+--%>
+<c:if test="${not empty sessionScope.flashSuccess}">
+    <div class="alert alert-success alert-dismissible fade show d-flex align-items-start gap-2" role="alert"
+         data-autohide="true">
+        <i class="bi bi-check-circle-fill mt-1"></i>
+        <div><c:out value="${sessionScope.flashSuccess}"/></div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <c:remove var="flashSuccess" scope="session"/>
+</c:if>
+
+<c:if test="${not empty sessionScope.flashError}">
+    <div class="alert alert-danger alert-dismissible fade show d-flex align-items-start gap-2" role="alert"
+         data-autohide="true">
+        <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+        <div><c:out value="${sessionScope.flashError}"/></div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <c:remove var="flashError" scope="session"/>
+</c:if>
+
+<c:if test="${not empty formError}">
+    <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+        <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+        <div><c:out value="${formError}"/></div>
+    </div>
+</c:if>

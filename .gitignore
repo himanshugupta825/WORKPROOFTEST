@@ -1,0 +1,50 @@
+# ============================================================
+# WorkProof - files that must NEVER be committed
+# ============================================================
+
+# ---- Build output ----
+target/
+build/
+*.war
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---- IDE / editor ----
+.idea/
+*.iml
+.vscode/settings.json
+.vscode/launch.json
+*.code-workspace
+.settings/
+.classpath
+.project
+nbproject/
+
+# ---- Local secrets: real DB passwords & upload paths ----
+# Keep the .example files, ignore the real ones.
+src/main/resources/workproof-local.properties
+config/
+workproof.properties.local
+*.secret
+*.pem
+*.key
+
+# ---- Uploaded user evidence files (never in Git) ----
+uploads/
+workproof-uploads/
+
+# ---- OS noise ----
+.DS_Store
+Thumbs.db
+*.log
+logs/
+
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Local configuration and credentials
+config-local.properties
+application-local.properties
