@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{layout/main :: head('Create Job')}"></head>
+<body>
+
+<nav th:replace="~{layout/main :: navbar}"></nav>
+<div th:replace="~{layout/main :: alerts}"></div>
+
+<main class="main-container container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center mb-3">
+                <a th:href="@{/jobs}" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+                <h3 class="fw-bold text-dark mb-0">Create Service Job</h3>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <form th:action="@{/jobs/create}" th:object="${jobDto}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label small fw-semibold text-secondary">Job Title <span class="text-danger">*</span></label>
+                            <input type="text" id="title" th:field="*{title}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
+                                   placeholder="e.g. Electrical Inspection & Panel Upgrade" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label small fw-semibold text-secondary">Scope of Work / Description</label>
+                            <textarea id="description" th:field="*{description}" class="form-control" rows="4"
+                                      placeholder="Describe the tasks, safety precautions, and client requirements..."></textarea>
+                        </div>
+
+                        <!-- Customer and Location Selection -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="customerId" class="form-label small fw-semibold text-secondary">Customer <span class="text-danger">*</span></label>
+                                <select id="customerId" th:field="*{customerId}" class="form-select"
+                                        th:classappend="${#fields.hasErrors('customerId')} ? 'is-invalid' : ''" required>
+                                    <option value="" disabled selected>-- Select Customer --</option>
+                                    <option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name} + ' (' + ${c.contactPerson} + ')'"></option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('customerId')}" th:errors="*{customerId}"></div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="locationId" class="form-label small fw-semibold text-secondary">Service Location <span class="text-danger">*</span></label>
+                                <select id="locationId" th:field="*{locationId}" class="form-select"
+                                        th:classappend="${#fields.hasErrors('locationId')} ? 'is-invalid' : ''" required>
+                                    <option value="" disabled selected>-- Select Location --</option>
+                                    <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name} + ' - ' + ${loc.address}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('locationId')}" th:errors="*{locationId}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Assign Technician -->
+                        <div class="mb-3">
+                            <label for="technicianId" class="form-label small fw-semibold text-secondary">Assign Field Technician (Optional)</label>
+                            <select id="technicianId" th:field="*{technicianId}" class="form-select">
+                                <option value="">-- Leave Unassigned for Now --</option>
+                                <option th:each="tech : ${technicians}" th:value="${tech.id}" th:text="${tech.fullName} + ' (' + ${tech.email} + ')'"></option>
+                            </select>
+                            <div class="form-text small">Jobs with an assigned technician automatically start in 'Assigned' status.</div>
+                        </div>
+
+                        <!-- Initial Mandatory Checklist Items -->
+                        <div class="mb-4">
+                            <label for="checklistItemsText" class="form-label small fw-semibold text-secondary">Mandatory Checklist Items (One per line)</label>
+                            <textarea id="checklistItemsText" th:field="*{checklistItemsText}" class="form-control" rows="3"
+                                      placeholder="Site safety check&#10;Primary maintenance action&#10;Post-work cleanup & test"></textarea>
+                            <div class="form-text small">Leave blank to use default industry checklist items.</div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/jobs}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                                <i class="bi bi-check-lg me-1"></i> Create Job
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/main :: footer}"></footer>
+<div th:replace="~{layout/main :: scripts}"></div>
+</body>
+</html>
+

@@ -126,9 +126,10 @@ public class AppContextListener implements ServletContextListener {
     /** Stops the MySQL connector cleanup thread so Tomcat can unload the webapp cleanly. */
     private void stopMysqlCleanupThread() {
         try {
-            com.mysql.cj.jdbc.AbandonedConnectionCleanupThread.checkedShutdown();
+            Class<?> clazz = Class.forName("com.mysql.cj.jdbc.AbandonedConnectionCleanupThread");
+            clazz.getMethod("checkedShutdown").invoke(null);
         } catch (Throwable ignored) {
-            // The driver may not be present (for example in unit tests) - nothing to do.
+            // The driver may not be present (for example in unit tests or PostgreSQL) - nothing to do.
         }
     }
 

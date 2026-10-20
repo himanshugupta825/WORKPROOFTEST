@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head th:replace="~{layout/main :: head(${job.title})}"></head>
+<body>
+
+<nav th:replace="~{layout/main :: navbar}"></nav>
+<div th:replace="~{layout/main :: alerts}"></div>
+
+<main class="main-container container">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <a th:href="@{/jobs}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+                <span class="text-muted small">Job #<span th:text="${job.id}">1</span></span>
+                <span class="badge rounded-pill" th:classappend="'bg-' + ${job.status.badgeColor}" th:text="${job.status.label}">Status</span>
+            </div>
+            <h3 class="fw-bold text-dark mb-0" th:text="${job.title}">Job Title</h3>
+        </div>
+
+        <!-- Quick Lifecycle Action Buttons -->
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <!-- Start Job (Assigned/Technician/Manager) -->
+            <form th:if="${job.status.name() == 'ASSIGNED' || job.status.name() == 'CREATED'}"
+                  th:action="@{'/jobs/' + ${job.id} + '/start'}" method="post"
+                  sec:authorize="hasAnyRole('TECHNICIAN', 'MEMBER', 'ADMIN', 'MANAGER')">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn-success btn-sm fw-semibold">
+                    <i class="bi bi-play-circle me-1"></i> Start Job
+                </button>
+            </form>
+
+            <!-- Complete Job (In Progress/Technician/Manager) -->
+            <form th:if="${job.status.name() == 'IN_PROGRESS'}"
+                  th:action="@{'/jobs/' + ${job.id} + '/complete'}" method="post"
+                  sec:authorize="hasAnyRole('TECHNICIAN', 'MEMBER', 'ADMIN', 'MANAGER')">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn-warning btn-sm fw-semibold text-dark">
+                    <i class="bi bi-check-circle me-1"></i> Complete Job & Generate Proof
+                </button>
+            </form>
+
+            <!-- Public Proof Link Button -->
+            <a th:if="${job.proofCode != null}" th:href="@{'/proof/' + ${job.proofCode}}"
+               target="_blank" class="btn btn-info btn-sm text-dark fw-semibold">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Open Public Proof
+            </a>
+        </div>
+    </div>
+
+    <!-- Public Proof Banner if completed -->
+    <div th:if="${job.proofCode != null}" class="alert alert-info border-info d-flex align-items-center justify-content-between p-3 rounded-4 shadow-sm mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-patch-check-fill fs-2 text-info me-3"></i>
+            <div>
+                <h6 class="fw-bold text-dark mb-0">Public Proof-of-Work Verification Active</h6>
+                <span class="small text-secondary">
+                    Verification Code: <strong class="text-dark" th:text="${job.proofCode}">CODE</strong> &bull;
+                    Shareable public URL:
+                    <a th:href="@{'/proof/' + ${job.proofCode}}" target="_blank" class="fw-semibold text-decoration-none">
+                        /proof/<span th:text="${job.proofCode}">CODE</span>
+                    </a>
+                </span>
+            </div>
+        </div>
+        <a th:href="@{'/proof/' + ${job.proofCode}}" target="_blank" class="btn btn-sm btn-dark">
+            View Public Page <i class="bi bi-chevron-right"></i>
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Details, Checklist, Evidence Gallery -->
+        <div class="col-lg-8">
+            <!-- Details Card -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-3">Job Overview</h5>
+                    <p class="text-secondary mb-4" th:text="${job.description != null && !job.description.isEmpty() ? job.description : 'No detailed description provided.'}">Description</p>
+
+                    <div class="row g-3 small">
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block">Customer</span>
+                            <span class="fw-semibold text-dark" th:text="${job.customer.name}">Acme Corp</span>
+                            <div class="text-muted" th:text="${job.customer.contactPerson}">Contact</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block">Location</span>
+                            <span class="fw-semibold text-dark" th:text="${job.location.name}">HQ Floor 4</span>
+                            <div class="text-muted" th:text="${job.location.address}">Address</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block">Assigned Technician</span>
+                            <span class="fw-semibold text-dark" th:if="${job.assignedTechnician != null}" th:text="${job.assignedTechnician.fullName}">Alex Rivers</span>
+                            <span class="text-muted" th:if="${job.assignedTechnician == null}">Unassigned</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted d-block">Execution Timing</span>
+                            <div>Started: <span class="fw-semibold text-dark" th:text="${job.startedAt != null ? #temporals.format(job.startedAt, 'yyyy-MM-dd HH:mm') : 'Not yet'}">--</span></div>
+                            <div>Completed: <span class="fw-semibold text-dark" th:text="${job.completedAt != null ? #temporals.format(job.completedAt, 'yyyy-MM-dd HH:mm') : 'Pending'}">--</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checklist Card -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0">Required Service Checklist</h5>
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary"
+                          th:text="${job.checklistItems.size()} + ' Items'">0 Items</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0 py-2 d-flex align-items-center justify-content-between"
+                             th:each="item : ${job.checklistItems}">
+                            <div class="d-flex align-items-center">
+                                <!-- Interactive Toggle Form -->
+                                <form th:action="@{'/jobs/' + ${job.id} + '/checklist/' + ${item.id} + '/toggle'}" method="post" class="me-3">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent"
+                                            th:disabled="${job.status.name() == 'COMPLETED' || job.status.name() == 'APPROVED' || job.status.name() == 'CANCELLED'}">
+                                        <i class="bi fs-4"
+                                           th:classappend="${item.completed} ? 'bi-check-square-fill text-success' : 'bi-square text-secondary'"></i>
+                                    </button>
+                                </form>
+                                <div>
+                                    <span th:classappend="${item.completed} ? 'text-decoration-line-through text-muted' : 'fw-semibold text-dark'"
+                                          th:text="${item.title}">Checklist Task</span>
+                                    <span th:if="${item.mandatory}" class="badge bg-danger bg-opacity-10 text-danger ms-1 small">Mandatory</span>
+                                    <div class="small text-muted" th:if="${item.completed}">
+                                        Completed <span th:text="${item.completedAt != null ? #temporals.format(item.completedAt, 'HH:mm') : ''}"></span>
+                                        <span th:if="${item.completedBy != null}" th:text="'by ' + ${item.completedBy.fullName}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Checklist Item (Technician / Manager) -->
+                    <div class="mt-3 pt-3 border-top" sec:authorize="hasAnyRole('TECHNICIAN', 'MEMBER', 'ADMIN', 'MANAGER')"
+                         th:if="${job.status.name() == 'IN_PROGRESS' || job.status.name() == 'ASSIGNED'}">
+                        <form th:action="@{'/jobs/' + ${job.id} + '/checklist/add'}" method="post" class="d-flex gap-2">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <input type="text" name="title" class="form-control form-control-sm" placeholder="Add custom task item..." required>
+                            <div class="form-check align-self-center text-nowrap small">
+                                <input class="form-check-input" type="checkbox" name="mandatory" id="mandCheck">
+                                <label class="form-check-label text-muted" for="mandCheck">Mandatory</label>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary btn-sm">Add</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evidence Gallery -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0">Digital Proof & Evidence Gallery</h5>
+                        <p class="text-muted small mb-0">Before/After photos, documentation and service notes</p>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div th:if="${#lists.isEmpty(job.evidenceList)}" class="text-center py-5 text-muted">
+                        <i class="bi bi-camera fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                        No evidence items uploaded yet. Upload before/after photos below.
+                    </div>
+
+                    <div class="row g-3" th:unless="${#lists.isEmpty(job.evidenceList)}">
+                        <div class="col-md-6" th:each="ev : ${job.evidenceList}">
+                            <div class="card evidence-card border h-100">
+                                <div th:if="${ev.isImage()}" class="position-relative">
+                                    <img th:src="@{'/evidence/files/' + ${ev.storedFileName}}" class="evidence-img" th:alt="${ev.caption}">
+                                    <span class="position-absolute top-0 start-0 m-2 badge"
+                                          th:classappend="${ev.evidenceType.name() == 'BEFORE_PHOTO'} ? 'bg-secondary' : (${ev.evidenceType.name() == 'AFTER_PHOTO'} ? 'bg-success' : 'bg-info')"
+                                          th:text="${ev.evidenceType.label}">Type</span>
+                                </div>
+                                <div th:unless="${ev.isImage()}" class="p-4 text-center bg-light border-bottom">
+                                    <i class="bi bi-file-earmark-text fs-1 text-primary"></i>
+                                    <div class="small fw-semibold mt-1" th:text="${ev.originalFileName}">filename.pdf</div>
+                                </div>
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold text-dark mb-1" th:text="${ev.caption != null && !ev.caption.isEmpty() ? ev.caption : ev.evidenceType.label}">Caption</h6>
+                                    <p th:if="${ev.noteContent != null}" class="text-secondary small mb-2" th:text="${ev.noteContent}"></p>
+                                    <div class="d-flex justify-content-between align-items-center small text-muted">
+                                        <span th:text="${#temporals.format(ev.uploadedAt, 'yyyy-MM-dd HH:mm')}">Date</span>
+                                        <a th:unless="${ev.evidenceType.name() == 'NOTE'}" th:href="@{'/evidence/files/' + ${ev.storedFileName}}" target="_blank" class="btn btn-outline-secondary btn-sm py-0 px-2">
+                                            <i class="bi bi-download"></i> View
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Upload Evidence, Customer Approval, Technician Assignment -->
+        <div class="col-lg-4">
+            <!-- Upload Evidence Box (Technician / Manager) -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4"
+                 sec:authorize="hasAnyRole('TECHNICIAN', 'MEMBER', 'ADMIN', 'MANAGER')"
+                 th:if="${job.status.name() != 'CANCELLED' && job.status.name() != 'APPROVED'}">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-cloud-arrow-up text-primary me-2"></i> Upload Evidence</h5>
+                    <form th:action="@{'/jobs/' + ${job.id} + '/evidence/upload'}"
+                          th:object="${evidenceDto}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Evidence Type</label>
+                            <select th:field="*{evidenceType}" class="form-select" id="evidenceTypeSelect" required>
+                                <option value="BEFORE_PHOTO">Before Photo (Pre-work condition)</option>
+                                <option value="AFTER_PHOTO">After Photo (Completed work proof)</option>
+                                <option value="DOCUMENT">Document / Service Report</option>
+                                <option value="NOTE">Service Note / Annotation</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="fileUploadContainer">
+                            <label class="form-label small fw-semibold text-secondary">File Attachment</label>
+                            <input type="file" th:field="*{file}" class="form-control" accept="image/*,.pdf,.doc,.docx,.txt">
+                            <div class="form-text small">Max 10 MB. JPG, PNG, WEBP, or PDF.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Caption / Description</label>
+                            <textarea th:field="*{caption}" class="form-control" rows="2" placeholder="e.g. Compressor filter before cleanout"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                            Upload Evidence
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Customer Approval Box -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4" th:if="${job.status.name() == 'COMPLETED'}">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-shield-check text-success fs-3 me-2"></i>
+                        <h5 class="fw-bold text-dark mb-0">Customer Sign-Off</h5>
+                    </div>
+                    <p class="text-muted small mb-3">Please review the checklist and evidence photos before authorizing sign-off.</p>
+
+                    <form th:action="@{'/jobs/' + ${job.id} + '/approve'}" th:object="${approvalDto}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Approver Name</label>
+                            <input type="text" th:field="*{approverName}" class="form-control"
+                                   th:value="${currentUser.fullName}" placeholder="Jane Smith" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Approval Comments / Feedback</label>
+                            <textarea th:field="*{comments}" class="form-control" rows="3" placeholder="Work verified and satisfactory..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i> Approve & Sign Off
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Already Approved Banner -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-success bg-opacity-10" th:if="${job.approval != null}">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-patch-check-fill text-success fs-3 me-2"></i>
+                        <h5 class="fw-bold text-success mb-0">Customer Approved</h5>
+                    </div>
+                    <div class="small text-dark mb-2">
+                        <strong>Approver:</strong> <span th:text="${job.approval.approverName}">Name</span>
+                        (<span th:text="${job.approval.approverEmail}">email</span>)
+                    </div>
+                    <div class="small text-muted mb-2">
+                        <strong>Date:</strong> <span th:text="${#temporals.format(job.approval.approvedAt, 'yyyy-MM-dd HH:mm')}">Time</span>
+                    </div>
+                    <div class="small text-secondary" th:if="${job.approval.comments != null && !job.approval.comments.isEmpty()}">
+                        <em>&ldquo;<span th:text="${job.approval.comments}">Comments</span>&rdquo;</em>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assign Technician Card (Managers & Admins) -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4" sec:authorize="hasAnyRole('ADMIN', 'MANAGER')"
+                 th:if="${job.status.name() != 'COMPLETED' && job.status.name() != 'APPROVED' && job.status.name() != 'CANCELLED'}">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-2">Assign Technician</h6>
+                    <form th:action="@{'/jobs/' + ${job.id} + '/assign'}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="mb-3">
+                            <select name="technicianId" class="form-select" required>
+                                <option value="" disabled selected>-- Select Technician --</option>
+                                <option th:each="tech : ${technicians}" th:value="${tech.id}"
+                                        th:selected="${job.assignedTechnician != null && job.assignedTechnician.id == tech.id}"
+                                        th:text="${tech.fullName}"></option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                            Update Assignment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/main :: footer}"></footer>
+<div th:replace="~{layout/main :: scripts}"></div>
+</body>
+</html>
+

@@ -2,35 +2,132 @@ package com.workproof.service;
 
 import com.workproof.dao.RoleDao;
 import com.workproof.dao.UserDao;
+import com.workproof.dto.RegisterDto;
 import com.workproof.exception.NotFoundException;
 import com.workproof.exception.ValidationException;
+import com.workproof.model.Customer;
 import com.workproof.model.PagedResult;
 import com.workproof.model.Role;
 import com.workproof.model.User;
 import com.workproof.model.enums.NotificationType;
 import com.workproof.model.enums.RoleName;
 import com.workproof.model.enums.UserStatus;
+import com.workproof.repository.CustomerRepository;
+import com.workproof.repository.UserRepository;
 import com.workproof.util.PasswordUtil;
 import com.workproof.util.ValidationUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Administrator user management (Module 1 & the admin screens).
- *
- * Safety rules implemented:
- *   - an administrator cannot deactivate or downgrade their own account,
- *   - the last active administrator cannot be deactivated (otherwise nobody could
- *     administer the system any more),
- *   - duplicate e-mails are refused,
- *   - passwords are always stored as BCrypt hashes.
+ * User management service supporting both Spring Boot platform operations
+ * and legacy administrative tools.
  */
+@Service
 public class UserService {
 
     private final UserDao userDao = new UserDao();
     private final RoleDao roleDao = new RoleDao();
     private final ActivityService activityService = new ActivityService();
     private final NotificationService notificationService = new NotificationService();
+
+    @Autowired(required = false)
+    private UserRepository userRepository;
+
+    @Autowired(required = false)
+    private CustomerRepository customerRepository;
+
+    @Autowired(required = false)
+    private PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public User registerUser(RegisterDto dto) {
+        if (dto == null) {
+            throw new ValidationException("Registration data cannot be null");
+        }
+        if (dto.getPassword() == null || !dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new ValidationException("Passwords do not match");
+        }
+
+        String email = dto.getEmail().trim().toLowerCase();
+        if (userRepository != null && userRepository.existsByEmail(email)) {
+            throw new ValidationException("An account with this email already exists");
+        }
+
+        String encodedPassword = passwordEncoder != null
+                ? passwordEncoder.encode(dto.getPassword())
+                : PasswordUtil.hash(dto.getPassword());
+
+        RoleName role = RoleName.from(dto.getRole());
+
+        User user = new User();
+        user.setFullName(dto.getFullName().trim());
+        user.setEmail(email);
+        user.setPasswordHash(encodedPassword);
+        user.setRole(role);
+        user.setUserStatus(UserStatus.ACTIVE);
+        user.setPhone(dto.getPhone());
+        user.setDepartment(dto.getDepartment());
+        user.setDesignation(dto.getDesignation());
+        user.setCreatedAt(LocalDateTime.now());
+
+        User savedUser = (userRepository != null) ? userRepository.save(user) : user;
+
+        // If registered as CUSTOMER, automatically create or link Customer profile
+        if (role == RoleName.CUSTOMER && customerRepository != null) {
+            Customer customer = new Customer();
+            customer.setName(dto.getFullName().trim());
+            customer.setContactPerson(dto.getFullName().trim());
+            customer.setEmail(email);
+            customer.setPhone(dto.getPhone());
+            customer.setAddress(dto.getAddress() != null && !dto.getAddress().isEmpty() ? dto.getAddress() : "Standard Address");
+            customer.setUser(savedUser);
+            customer.setCreatedAt(LocalDateTime.now());
+            customerRepository.save(customer);
+        }
+
+        return savedUser;
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> getAllTechnicians() {
+        if (userRepository != null) {
+            return userRepository.findByRoleNameIn(List.of("TECHNICIAN", "MEMBER"));
+        }
+        return userDao.findAssignableUsers();
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> getAllManagers() {
+        if (userRepository != null) {
+            return userRepository.findByRoleNameIn(List.of("MANAGER", "ADMIN"));
+        }
+        return List.of();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> findUserByEmail(String email) {
+        if (userRepository != null && email != null) {
+            return userRepository.findByEmail(email.trim().toLowerCase());
+        }
+        return Optional.empty();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> findUserById(Integer id) {
+        if (userRepository != null && id != null) {
+            return userRepository.findById(id);
+        }
+        return Optional.ofNullable(userDao.findById(id));
+    }
+
+    /* ------------------- Legacy methods for backward compatibility ------------------- */
 
     public List<Role> allRoles() {
         return roleDao.findAll();
@@ -41,10 +138,16 @@ public class UserService {
     }
 
     public User findById(int userId) {
+        if (userRepository != null) {
+            return userRepository.findById(userId).orElse(null);
+        }
         return userDao.findById(userId);
     }
 
     public List<User> findAll() {
+        if (userRepository != null) {
+            return userRepository.findAll();
+        }
         return userDao.findAllBasic();
     }
 
@@ -57,6 +160,9 @@ public class UserService {
     }
 
     public int countAll() {
+        if (userRepository != null) {
+            return (int) userRepository.count();
+        }
         return userDao.countAll();
     }
 

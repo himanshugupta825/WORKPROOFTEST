@@ -2,28 +2,68 @@ package com.workproof.model;
 
 import com.workproof.model.enums.RoleName;
 import com.workproof.model.enums.UserStatus;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 /**
- * Row of the `users` table (never exposes the password hash to JSP pages).
- * The domain object is what the servlets and JSP pages work with.
+ * Row of the `users` table and JPA Entity.
+ * The domain object is used across Spring Security, Spring Data JPA, and web layers.
  */
+@Entity
+@Table(name = "users")
 public class User {
 
-    private int id;
-    private String fullName;
-    private String email;
-    /** BCrypt hash - intentionally NOT exposed through a getter for JSP use. */
-    private String passwordHash;
-    private int roleId;
-    private String roleName;
-    private String status = "ACTIVE";
-    private String department;
-    private String designation;
-    private String phone;
-    private java.time.LocalDateTime lastLoginAt;
-    private java.time.LocalDateTime createdAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    public int getId() { return id; }
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
+
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
+    /** BCrypt hash - intentionally NOT exposed through a getter for JSP/view use. */
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
+
+    @Column(name = "role_id")
+    private int roleId = 1;
+
+    @Column(name = "role_name", nullable = false)
+    private String roleName = "TECHNICIAN";
+
+    @Column(name = "status", nullable = false)
+    private String status = "ACTIVE";
+
+    @Column(name = "department")
+    private String department;
+
+    @Column(name = "designation")
+    private String designation;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    public User() {}
+
+    public User(String fullName, String email, String passwordHash, RoleName role) {
+        this.fullName = fullName;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.roleName = (role != null) ? role.name() : RoleName.TECHNICIAN.name();
+        this.status = "ACTIVE";
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
     public void setId(int id) { this.id = id; }
 
     public String getFullName() { return fullName; }
@@ -53,20 +93,32 @@ public class User {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
-    public java.time.LocalDateTime getLastLoginAt() { return lastLoginAt; }
-    public void setLastLoginAt(java.time.LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
+    public LocalDateTime getLastLoginAt() { return lastLoginAt; }
+    public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
 
-    public java.time.LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(java.time.LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    /* ------------------- typed helpers used by JSP EL and Java code ------------------- */
+    /* ------------------- typed helpers used by templates and Java code ------------------- */
 
     public RoleName getRole() {
         return RoleName.from(roleName);
     }
 
+    public void setRole(RoleName role) {
+        if (role != null) {
+            this.roleName = role.name();
+        }
+    }
+
     public UserStatus getUserStatus() {
         return UserStatus.from(status);
+    }
+
+    public void setUserStatus(UserStatus userStatus) {
+        if (userStatus != null) {
+            this.status = userStatus.name();
+        }
     }
 
     public boolean isAdmin() {
@@ -83,6 +135,14 @@ public class User {
 
     public boolean isReviewer() {
         return getRole() == RoleName.REVIEWER;
+    }
+
+    public boolean isTechnician() {
+        return getRole() == RoleName.TECHNICIAN || getRole() == RoleName.MEMBER;
+    }
+
+    public boolean isCustomer() {
+        return getRole() == RoleName.CUSTOMER;
     }
 
     public boolean isActive() {
@@ -103,7 +163,4 @@ public class User {
     public String toString() {
         return "User{id=" + id + ", email=" + email + ", role=" + roleName + "}";
     }
-
-    /* Deliberately no equals/hashCode override: identity is the database id and
-       entity instances are not used as collection keys. */
 }

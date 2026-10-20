@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{layout/main :: head('Audit Log')}"></head>
+<body>
+
+<nav th:replace="~{layout/main :: navbar}"></nav>
+<div th:replace="~{layout/main :: alerts}"></div>
+
+<main class="main-container container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-0">System Audit Trail</h3>
+            <p class="text-muted small mb-0">Immutable, read-only event log for all platform and proof-of-work actions</p>
+        </div>
+        <span class="badge bg-secondary p-2 px-3 rounded-pill">
+            <i class="bi bi-lock-fill me-1"></i> Read Only
+        </span>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small text-secondary">
+                    <tr>
+                        <th class="ps-3">Timestamp</th>
+                        <th>Action</th>
+                        <th>Job Context</th>
+                        <th>User / Actor</th>
+                        <th>IP Address</th>
+                        <th class="pe-3">Event Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(logs)}">
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-journal-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            No audit events logged yet.
+                        </td>
+                    </tr>
+                    <tr th:each="log : ${logs}">
+                        <td class="ps-3 small text-muted text-nowrap"
+                            th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">
+                            2026-10-14 10:00:00
+                        </td>
+                        <td>
+                            <span class="badge" th:classappend="'bg-' + ${log.action.badgeClass}"
+                                  th:text="${log.action.label}">ACTION</span>
+                        </td>
+                        <td>
+                            <span th:if="${log.jobId != null}">
+                                <a th:href="@{'/jobs/' + ${log.jobId}}" class="text-decoration-none fw-semibold"
+                                   th:text="${log.jobTitle != null ? log.jobTitle : 'Job #' + log.jobId}">Job</a>
+                            </span>
+                            <span th:if="${log.jobId == null}" class="text-muted small">--</span>
+                        </td>
+                        <td class="small">
+                            <span class="fw-semibold text-dark" th:text="${log.userEmail != null ? log.userEmail : 'System'}">user</span>
+                        </td>
+                        <td class="small text-muted font-monospace" th:text="${log.ipAddress}">127.0.0.1</td>
+                        <td class="small text-secondary pe-3" th:text="${log.details}">Details</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/main :: footer}"></footer>
+<div th:replace="~{layout/main :: scripts}"></div>
+</body>
+</html>
+

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{layout/main :: head('Server Error (500)')}"></head>
+<body class="bg-light">
+
+<nav th:replace="~{layout/main :: navbar}"></nav>
+
+<div class="container d-flex flex-column justify-content-center align-items-center min-vh-75 py-5 text-center">
+    <div class="rounded-circle bg-danger bg-opacity-10 p-4 mb-3 text-danger">
+        <i class="bi bi-exclamation-octagon fs-1"></i>
+    </div>
+    <h1 class="display-5 fw-bold text-dark">500</h1>
+    <h4 class="fw-semibold text-secondary mb-3">Something Went Wrong</h4>
+    <p class="text-muted mb-4" style="max-width: 480px;"
+       th:text="${message != null ? message : 'An unexpected server error occurred while processing your request.'}">
+        An internal server error occurred.
+    </p>
+    <div>
+        <a th:href="@{/dashboard}" class="btn btn-primary px-4 fw-semibold">
+            <i class="bi bi-arrow-clockwise me-1"></i> Return to Dashboard
+        </a>
+    </div>
+</div>
+
+<footer th:replace="~{layout/main :: footer}"></footer>
+<div th:replace="~{layout/main :: scripts}"></div>
+</body>
+</html>
+

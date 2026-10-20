@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title + ' - WorkProof'}">WorkProof</title>
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" th:href="@{/assets/vendor/bootstrap/bootstrap.min.css}">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" th:href="@{/assets/vendor/bootstrap-icons/bootstrap-icons.css}">
+    <!-- App Custom CSS -->
+    <link rel="stylesheet" th:href="@{/assets/css/workproof.css}">
+    <link rel="icon" type="image/svg+xml" th:href="@{/assets/img/favicon.svg}">
+    <style>
+        :root {
+            --wp-primary: #1e3a8a;
+            --wp-primary-hover: #172554;
+            --wp-accent: #0284c7;
+            --wp-bg-light: #f8fafc;
+        }
+        body {
+            background-color: var(--wp-bg-light);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar-brand-badge {
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 6px;
+        }
+        .main-container {
+            flex: 1;
+            padding-top: 1.5rem;
+            padding-bottom: 3rem;
+        }
+        .card-stat {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        .card-stat:hover {
+            transform: translateY(-2px);
+        }
+        .evidence-card {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .evidence-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .badge-status {
+            font-weight: 500;
+            padding: 0.35em 0.65em;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation Bar with Role-based Visibility -->
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container-fluid px-lg-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center" th:href="@{/dashboard}">
+            <i class="bi bi-shield-check text-info me-2 fs-4"></i>
+            <span>WorkProof</span>
+            <span class="navbar-brand-badge text-light">v1.0</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/dashboard}">
+                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/jobs}">
+                        <i class="bi bi-briefcase me-1"></i> Jobs
+                    </a>
+                </li>
+                <!-- Visible only to Managers & Admins -->
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
+                    <a class="nav-link" th:href="@{/locations}">
+                        <i class="bi bi-geo-alt me-1"></i> Locations
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
+                    <a class="nav-link" th:href="@{/audit}">
+                        <i class="bi bi-journal-text me-1"></i> Audit Trail
+                    </a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <!-- User Profile & Logout -->
+                <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+                        <span class="badge bg-primary rounded-circle p-2 me-2"
+                              th:text="${#authentication != null and #authentication.name != null and !#authentication.name.isEmpty() ? #authentication.name.substring(0,1).toUpperCase() : 'U'}">U</span>
+                        <span class="text-light" th:text="${#authentication != null ? #authentication.name : 'User'}">User</span>
+                        <span class="badge bg-secondary ms-2"
+                              th:text="${#authentication != null and #authentication.principal != null ? #authentication.principal.roleName : ''}">Role</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><h6 class="dropdown-header">Signed in as <span class="fw-bold" th:text="${#authentication != null ? #authentication.name : 'user'}">user</span></h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" class="px-2">
+                                <button type="submit" class="btn btn-outline-danger btn-sm w-100 text-start">
+                                    <i class="bi bi-box-arrow-right me-2"></i> Log out
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+                <!-- Unauthenticated Options -->
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" th:href="@{/login}"><i class="bi bi-box-arrow-in-right me-1"></i> Sign In</a>
+                </li>
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="btn btn-info btn-sm text-dark ms-lg-2 fw-semibold" th:href="@{/register}">Register</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Alerts / Flash Messages -->
+<div th:fragment="alerts" class="container mt-3">
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+
+<!-- Footer Fragment -->
+<footer th:fragment="footer" class="bg-white border-top py-3 mt-auto">
+    <div class="container text-center text-muted small">
+        <span>WorkProof &copy; 2026 &bull; Digital Proof-of-Work & Evidence Management</span>
+    </div>
+</footer>
+
+<div th:fragment="scripts">
+    <script th:src="@{/assets/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
+</div>
+</body>
+</html>
+

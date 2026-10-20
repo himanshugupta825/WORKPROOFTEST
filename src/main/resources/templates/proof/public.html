@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{layout/main :: head('Digital Proof of Work - ' + ${job.title})}"></head>
+<body class="bg-light">
+
+<header class="bg-white border-bottom py-3 shadow-sm">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-shield-check text-primary fs-3 me-2"></i>
+            <div>
+                <h5 class="fw-bold text-dark mb-0">WorkProof Certificate</h5>
+                <span class="text-muted small">Public Verification Registry</span>
+            </div>
+        </div>
+        <div>
+            <span class="badge bg-success bg-opacity-10 text-success p-2 px-3 rounded-pill fw-semibold border border-success">
+                <i class="bi bi-check-circle-fill me-1"></i> Digitally Verified
+            </span>
+        </div>
+    </div>
+</header>
+
+<main class="main-container container py-4">
+    <!-- Certificate Banner -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-body p-4 p-md-5 bg-white">
+            <div class="row align-items-center gy-4">
+                <div class="col-md-8">
+                    <span class="badge bg-primary bg-opacity-10 text-primary mb-2 fw-semibold">PROOF OF WORK RECORD</span>
+                    <h2 class="fw-bold text-dark mb-2" th:text="${job.title}">HVAC Maintenance Service</h2>
+                    <p class="text-secondary mb-3" th:text="${job.description}">Detailed service task summary.</p>
+
+                    <div class="row g-3 small text-muted">
+                        <div class="col-sm-6">
+                            <span class="d-block fw-semibold text-dark">Customer Organization</span>
+                            <span th:text="${job.customer.name}">Acme Corporation</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="d-block fw-semibold text-dark">Service Location</span>
+                            <span th:text="${job.location.name} + ' (' + ${job.location.city} + ')'">Downtown Facility (San Francisco)</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="d-block fw-semibold text-dark">Certified Technician</span>
+                            <span th:text="${job.assignedTechnician != null ? job.assignedTechnician.fullName : 'Certified Field Specialist'}">Alex Rivers</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="d-block fw-semibold text-dark">Verification Code</span>
+                            <code class="fs-6 text-dark fw-bold" th:text="${proofCode}">CODE</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-md-end">
+                    <div class="card bg-light border-0 p-3 rounded-3 text-start">
+                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-calendar-check me-1 text-primary"></i> Execution Timeline</h6>
+                        <div class="small mb-1">
+                            <span class="text-muted">Started:</span>
+                            <span class="fw-semibold text-dark" th:text="${job.startedAt != null ? #temporals.format(job.startedAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">--</span>
+                        </div>
+                        <div class="small mb-2">
+                            <span class="text-muted">Completed:</span>
+                            <span class="fw-semibold text-dark" th:text="${job.completedAt != null ? #temporals.format(job.completedAt, 'yyyy-MM-dd HH:mm') : 'N/A'}">--</span>
+                        </div>
+                        <div th:if="${job.approval != null}" class="small text-success pt-2 border-top">
+                            <i class="bi bi-patch-check-fill me-1"></i>
+                            Approved by <span class="fw-bold" th:text="${job.approval.approverName}">Client</span>
+                            on <span th:text="${#temporals.format(job.approval.approvedAt, 'yyyy-MM-dd')}">Date</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Before & After Comparison Gallery -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <h5 class="fw-bold text-dark mb-1">Visual Evidence: Before &amp; After Comparison</h5>
+            <p class="text-muted small mb-0">High-resolution photographic proof captured on site by the technician</p>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <!-- Before Photos Column -->
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-secondary p-2 px-3 rounded-pill me-2">BEFORE WORK</span>
+                        <span class="text-muted small">Pre-existing condition</span>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(beforePhotos)}" class="text-center py-4 text-muted bg-light rounded-3 small">
+                        No initial condition photos uploaded.
+                    </div>
+
+                    <div class="row g-3" th:unless="${#lists.isEmpty(beforePhotos)}">
+                        <div class="col-12" th:each="ev : ${beforePhotos}">
+                            <div class="card evidence-card border">
+                                <img th:src="@{'/evidence/files/' + ${ev.storedFileName}}" class="evidence-img" th:alt="${ev.caption}">
+                                <div class="card-body p-2">
+                                    <span class="small fw-semibold text-dark" th:text="${ev.caption != null ? ev.caption : 'Initial Condition'}">Caption</span>
+                                    <div class="text-muted small" th:text="${#temporals.format(ev.uploadedAt, 'yyyy-MM-dd HH:mm')}">Time</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- After Photos Column -->
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-success p-2 px-3 rounded-pill me-2">AFTER WORK</span>
+                        <span class="text-muted small">Completed resolution</span>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(afterPhotos)}" class="text-center py-4 text-muted bg-light rounded-3 small">
+                        No completion photos uploaded.
+                    </div>
+
+                    <div class="row g-3" th:unless="${#lists.isEmpty(afterPhotos)}">
+                        <div class="col-12" th:each="ev : ${afterPhotos}">
+                            <div class="card evidence-card border">
+                                <img th:src="@{'/evidence/files/' + ${ev.storedFileName}}" class="evidence-img" th:alt="${ev.caption}">
+                                <div class="card-body p-2">
+                                    <span class="small fw-semibold text-dark" th:text="${ev.caption != null ? ev.caption : 'Completed State'}">Caption</span>
+                                    <div class="text-muted small" th:text="${#temporals.format(ev.uploadedAt, 'yyyy-MM-dd HH:mm')}">Time</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Evidence & Notes -->
+            <div th:unless="${#lists.isEmpty(otherEvidence)}" class="mt-4 pt-3 border-top">
+                <h6 class="fw-bold text-dark mb-3">Documents &amp; Service Notes</h6>
+                <div class="row g-3">
+                    <div class="col-md-6" th:each="ev : ${otherEvidence}">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <span class="badge bg-info text-dark mb-1" th:text="${ev.evidenceType.label}">Type</span>
+                            <div class="fw-semibold text-dark small" th:text="${ev.caption}">Caption</div>
+                            <div class="text-muted small" th:if="${ev.noteContent != null}" th:text="${ev.noteContent}"></div>
+                            <a th:unless="${ev.evidenceType.name() == 'NOTE'}" th:href="@{'/evidence/files/' + ${ev.storedFileName}}" target="_blank" class="small text-decoration-none mt-1 d-inline-block">
+                                <i class="bi bi-file-earmark-arrow-down"></i> Download Attachment
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verified Checklist -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <h5 class="fw-bold text-dark mb-1">Execution Quality Checklist</h5>
+            <p class="text-muted small mb-0">Verified tasks completed during service execution</p>
+        </div>
+        <div class="card-body p-4">
+            <div class="list-group list-group-flush">
+                <div class="list-group-item px-0 py-2 d-flex align-items-center justify-content-between"
+                     th:each="item : ${job.checklistItems}">
+                    <div class="d-flex align-items-center">
+                        <i class="bi fs-5 me-2"
+                           th:classappend="${item.completed} ? 'bi-check-circle-fill text-success' : 'bi-dash-circle text-muted'"></i>
+                        <span th:classappend="${item.completed} ? 'text-dark' : 'text-muted'"
+                              th:text="${item.title}">Task Title</span>
+                    </div>
+                    <span th:if="${item.completed}" class="badge bg-light text-success border border-success-subtle small">
+                        Verified
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign-off & Authenticity Guarantee -->
+    <div class="card border-0 bg-dark text-white rounded-4 shadow-sm p-4 text-center">
+        <i class="bi bi-shield-lock-fill text-info fs-1 mb-2"></i>
+        <h5 class="fw-bold mb-1">Tamper-Evident Digital Record</h5>
+        <p class="text-light text-opacity-75 small mb-0" style="max-width: 600px; margin: 0 auto;">
+            This document certifies completion and verification of the specified services.
+            Record cryptographic proof identifier: <strong class="text-info" th:text="${proofCode}">CODE</strong>.
+        </p>
+    </div>
+</main>
+
+<footer th:replace="~{layout/main :: footer}"></footer>
+<div th:replace="~{layout/main :: scripts}"></div>
+</body>
+</html>
+

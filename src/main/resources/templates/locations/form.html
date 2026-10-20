@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{layout/main :: head(${isEdit} ? 'Edit Location' : 'Add Location')}"></head>
+<body>
+
+<nav th:replace="~{layout/main :: navbar}"></nav>
+<div th:replace="~{layout/main :: alerts}"></div>
+
+<main class="main-container container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="d-flex align-items-center mb-3">
+                <a th:href="@{/locations}" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <h3 class="fw-bold text-dark mb-0" th:text="${isEdit} ? 'Edit Location' : 'New Service Location'">Location</h3>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <form th:action="${isEdit} ? @{'/locations/' + ${locationDto.id} + '/edit'} : @{/locations/create}"
+                          th:object="${locationDto}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label small fw-semibold text-secondary">Location / Facility Name <span class="text-danger">*</span></label>
+                            <input type="text" id="name" th:field="*{name}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''" placeholder="HQ Main Office" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="address" class="form-label small fw-semibold text-secondary">Street Address <span class="text-danger">*</span></label>
+                            <input type="text" id="address" th:field="*{address}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('address')} ? 'is-invalid' : ''" placeholder="100 Market St, Suite 400" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-7">
+                                <label for="city" class="form-label small fw-semibold text-secondary">City</label>
+                                <input type="text" id="city" th:field="*{city}" class="form-control" placeholder="San Francisco">
+                            </div>
+                            <div class="col-md-5">
+                                <label for="postalCode" class="form-label small fw-semibold text-secondary">Postal / ZIP Code</label>
+                                <input type="text" id="postalCode" th:field="*{postalCode}" class="form-control" placeholder="94105">
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-4">
+                            <div class="col-md-6">
+                                <label for="contactName" class="form-label small fw-semibold text-secondary">On-Site Contact Person</label>
+                                <input type="text" id="contactName" th:field="*{contactName}" class="form-control" placeholder="Sarah Connor">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="contactPhone" class="form-label small fw-semibold text-secondary">Contact Phone</label>
+                                <input type="tel" id="contactPhone" th:field="*{contactPhone}" class="form-control" placeholder="+1-555-0199">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/locations}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                                <span th:text="${isEdit} ? 'Update Location' : 'Save Location'">Save</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/main :: footer}"></footer>
+<div th:replace="~{layout/main :: scripts}"></div>
+</body>
+</html>
+

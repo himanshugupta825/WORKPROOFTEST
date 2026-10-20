@@ -48,3 +48,8 @@ logs/
 # Local configuration and credentials
 config-local.properties
 application-local.properties
+# Local H2 database & runtime evidence storage
+data/
+bin/
+*.mv.db
+*.trace.db

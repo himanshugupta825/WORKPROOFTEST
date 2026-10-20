@@ -1,13 +1,15 @@
 package com.workproof.model.enums;
 
 /**
- * Application-wide role. Stored in roles.name / users.role_id.
- * This is the GLOBAL role of an account (one per user).
+ * Application-wide role for Spring Security and access control.
+ * Supports ADMIN, MANAGER, TECHNICIAN, and CUSTOMER (with legacy aliases).
  */
 public enum RoleName {
     ADMIN("Administrator"),
-    MANAGER("Project Manager"),
-    MEMBER("Team Member"),
+    MANAGER("Manager"),
+    TECHNICIAN("Technician"),
+    CUSTOMER("Customer"),
+    MEMBER("Technician / Member"),
     REVIEWER("Reviewer / Mentor");
 
     private final String label;
@@ -20,7 +22,7 @@ public enum RoleName {
         return label;
     }
 
-    /** Safe lookup - returns MEMBER when the database value is unknown. */
+    /** Safe lookup - defaults to MEMBER if unknown */
     public static RoleName from(String value) {
         if (value == null) {
             return MEMBER;
